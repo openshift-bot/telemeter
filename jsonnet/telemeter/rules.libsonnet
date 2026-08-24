@@ -250,6 +250,21 @@
               |||,
             },
             {
+              // Sum of ACM managed cluster cores that are considered to be self-managed connected clusters
+              // Unlike the above acm_capacity_effective_cpu_cores rule, this goes directly to acm_managed_cluster_worker_cores:max and further filters down based on product names.
+              record: 'acm:managed_cluster_worker_cores:self_managed:sum',
+              expr: |||
+                sum by (_id) (acm_managed_cluster_worker_cores:max and on(hub_cluster_id, managed_cluster_id) acm_managed_cluster_info{product=~"OpenShift|MicroShift"})
+              |||,
+            },
+            {
+              // Sum of ACM managed cluster cores that are considered to be managed connected clusters (mutually exclusive vs the previous ruke)
+              record: 'acm:managed_cluster_worker_cores:managed:sum',
+              expr: |||
+                sum by (_id) (acm_managed_cluster_worker_cores:max and on(hub_cluster_id, managed_cluster_id) acm_managed_cluster_info{product!~"OpenShift|MicroShift"})
+              |||,
+            },
+            {
               // ROSA HCP Cluster vCPU-hours for the last hour.
               record: 'hostedcluster:hypershift_cluster_vcpus:vcpu_hours',
               expr: |||
